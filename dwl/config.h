@@ -1,9 +1,10 @@
-/* bread's dwl */
 /* patches: */
 /* rotate clients */
 /* vanity-gaps 0.7 */
 /* client opacity focus */
-/* custom float */
+/* custom float */ 
+/* minimise fix */ 
+/* cursor hide */
 
 /* Taken from https://github.com/djpohly/dwl/issues/466 */
 #define COLOR(hex)    { ((hex >> 24) & 0xFF) / 255.0f, \
@@ -15,11 +16,11 @@ static const int sloppyfocus               = 1;  /* focus follows mouse */
 static const int bypass_surface_visibility = 0;  /* 1 means idle inhibitors will disable idle tracking even if it's surface isn't visible  */
 static const int smartgaps                 = 0;  /* 1 means no outer gap when there is only one window */
 static const int monoclegaps               = 0;  /* 1 means outer gaps in monocle layout */
-static const unsigned int borderpx         = 0;  /* border pixel of windows */
-static const unsigned int gappih           = 7; /* horiz inner gap between windows */
-static const unsigned int gappiv           = 7; /* vert inner gap between windows */
-static const unsigned int gappoh           = 25; /* horiz outer gap between windows and screen edge */
-static const unsigned int gappov           = 35; /* vert outer gap between windows and screen edge */
+static const unsigned int borderpx         = 1;  /* border pixel of windows */
+static const unsigned int gappih           = 20; /* horiz inner gap between windows */
+static const unsigned int gappiv           = 20; /* vert inner gap between windows */
+static const unsigned int gappoh           = 20; /* horiz outer gap between windows and screen edge */
+static const unsigned int gappov           = 30; /* vert outer gap between windows and screen edge */
 static const float rootcolor[]             = COLOR(0x222222ff);
 static const float bordercolor[]           = COLOR(0x444444ff);
 static const float focuscolor[]            = COLOR(0x005577ff);
@@ -27,7 +28,7 @@ static const float urgentcolor[]           = COLOR(0xff0000ff);
 /* This conforms to the xdg-protocol. Set the alpha to zero to restore the old behavior */
 static const float fullscreen_bg[]         = {0.0f, 0.0f, 0.0f, 1.0f}; /* You can also use glsl colors */
 static const int respect_monitor_reserved_area = 0;  /* 1 to monitor center while respecting the monitor's reserved area, 0 to monitor center */
-static const float default_opacity_unfocus = 0.9f;
+static const float default_opacity_unfocus = 1.0f;
 static const float default_opacity_focus   = 1.0f;
 
 /* tagging - TAGCOUNT must be no greater than 31 */
@@ -63,7 +64,7 @@ static const Layout layouts[] = {
 static const MonitorRule monrules[] = {
 	/* name       mfact  nmaster scale layout       rotate/reflect                x    y */
 	/* example of a HiDPI laptop monitor: */
-	{ "eDP-1_example",    0.5f,  1,      2,    &layouts[0], WL_OUTPUT_TRANSFORM_NORMAL,   -1,  -1 },
+	 { NULL, 0.5f, 1, 1, &layouts[0], WL_OUTPUT_TRANSFORM_NORMAL, -1, -1 },
 };
 
 /* keyboard */
@@ -71,13 +72,14 @@ static const struct xkb_rule_names xkb_rules = {
 	/* can specify fields: rules, model, layout, variant, options */
 	/* example:
 	.options = "ctrl:nocaps",
-	*/
+	*/ 
+  .layout = "si",
 	.options = "ctrl:nocaps",
 };
 
 /* increased for faster typing */
-static const int repeat_rate = 75;
-static const int repeat_delay = 150;
+static const int repeat_rate = 35;
+static const int repeat_delay = 200;
 
 /* Trackpad */
 static const int tap_to_click = 1;
@@ -137,8 +139,8 @@ static const int cursor_timeout = 20;
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 
 /* commands */
-static const char *term[] = { "foot", NULL };
-static const char *browser[] = { "qutebrowser", NULL };
+static const char *term[] = { "kitty", NULL };
+static const char *browser[] = { "helium-browser", NULL };
 
 static const Key keys[] = {
 	/* Note that Shift changes certain key codes: c -> C, 2 -> at, etc. */
@@ -146,16 +148,15 @@ static const Key keys[] = {
 	
 
 	/* core programs */
-	{ MODKEY, XKB_KEY_w, spawn, {.v = browser} },
-	{ MODKEY, XKB_KEY_Return, spawn, {.v = term} },
-
+ { MODKEY, XKB_KEY_Return, spawn, {.v = term} },        // Kitty
+ { MODKEY, XKB_KEY_b,      spawn, {.v = browser} },     // Browser
+ { MODKEY, XKB_KEY_d,      spawn, {.v = (const char*[]){ "vesktop", NULL } } }, // Discord
 
 	/* other programs */
 	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_D, spawn, {.v = (const char*[]){ "darktable", NULL } } },
 
 
 	/* scripts, menus, shell cmd examples */
-	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_W, spawn, {.v = (const char*[]){ "example", NULL } } },
 	{ MODKEY, XKB_KEY_Insert, spawn, SHCMD("mpc prev") },
 	{ MODKEY, XKB_KEY_Prior, spawn, SHCMD("mpc next") },
 	{ MODKEY, XKB_KEY_Scroll_Lock, spawn, SHCMD("mpc toggle") },
@@ -177,13 +178,13 @@ static const Key keys[] = {
 	{ MODKEY,                    XKB_KEY_h,          setmfact,       {.f = -0.05f} },
 	{ MODKEY,                    XKB_KEY_l,          setmfact,       {.f = +0.05f} },
 
-	{ MODKEY,                    XKB_KEY_Return,     zoom,           {0} },
+	{ MODKEY,                    XKB_KEY_space,     zoom,           {0} },
 	{ MODKEY,                    XKB_KEY_Tab,        view,           {0} },
-	{ MODKEY, 					 XKB_KEY_q,          killclient,     {0} },
-	{ MODKEY,                    XKB_KEY_t,          setlayout,      {.v = &layouts[0]} },
+	{ MODKEY,                    XKB_KEY_q,          killclient,     {0} },
+	//{ MODKEY,                    XKB_KEY_t,          setlayout,      {.v = &layouts[0]} },
 	// { MODKEY,                    XKB_KEY_e,          setlayout,      {.v = &layouts[1]} },
-	{ MODKEY,                    XKB_KEY_m,          setlayout,      {.v = &layouts[2]} },
-	{ MODKEY,                    XKB_KEY_space,      setlayout,      {0} },
+	//{ MODKEY,                    XKB_KEY_m,          setlayout,      {.v = &layouts[2]} },
+	//{ MODKEY,                    XKB_KEY_space,      setlayout,      {0} },
 	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_space,      togglefloating, {0} },
 	{ MODKEY,                    XKB_KEY_f,         togglefullscreen, {0} },
 	{ MODKEY,                    XKB_KEY_0,          view,           {.ui = ~0} },
@@ -192,36 +193,47 @@ static const Key keys[] = {
 
 	/* monitors */
 	// { MODKEY,                    XKB_KEY_comma,      focusmon,       {.i = WLR_DIRECTION_LEFT} },
-	{ MODKEY,                    XKB_KEY_backslash,      focusmon,       {.i = WLR_DIRECTION_LEFT} },
+	//{ MODKEY,                    XKB_KEY_backslash,      focusmon,       {.i = WLR_DIRECTION_LEFT} },
 	// { MODKEY,                    XKB_KEY_period,     focusmon,       {.i = WLR_DIRECTION_RIGHT} },
-	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_bar,       tagmon,         {.i = WLR_DIRECTION_LEFT} },
+	//{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_bar,       tagmon,         {.i = WLR_DIRECTION_LEFT} },
 	// { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_greater,    tagmon,         {.i = WLR_DIRECTION_RIGHT} },
 	
 
 	/* client opacity focus */
-	{ MODKEY|WLR_MODIFIER_CTRL,  XKB_KEY_k,          setopacityunfocus, {.f = +0.1f} },
-	{ MODKEY|WLR_MODIFIER_CTRL,  XKB_KEY_j,          setopacityunfocus, {.f = -0.1f} },
-	{ MODKEY|WLR_MODIFIER_CTRL|WLR_MODIFIER_SHIFT, XKB_KEY_K, setopacityfocus, {.f = +0.1f} },
-	{ MODKEY|WLR_MODIFIER_CTRL|WLR_MODIFIER_SHIFT, XKB_KEY_J, setopacityfocus, {.f = -0.1f} },
+	//{ MODKEY|WLR_MODIFIER_CTRL,  XKB_KEY_k,          setopacityunfocus, {.f = +0.1f} },
+	//{ MODKEY|WLR_MODIFIER_CTRL,  XKB_KEY_j,          setopacityunfocus, {.f = -0.1f} },
+	//{ MODKEY|WLR_MODIFIER_CTRL|WLR_MODIFIER_SHIFT, XKB_KEY_K, setopacityfocus, {.f = +0.1f} },
+	//{ MODKEY|WLR_MODIFIER_CTRL|WLR_MODIFIER_SHIFT, XKB_KEY_J, setopacityfocus, {.f = -0.1f} },
 
 
 	/* vanity gaps */
-	{ MODKEY|WLR_MODIFIER_LOGO,  XKB_KEY_h,          incgaps,       {.i = +1 } },
-	{ MODKEY|WLR_MODIFIER_LOGO,  XKB_KEY_l,          incgaps,       {.i = -1 } },
-	{ MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_SHIFT,   XKB_KEY_H,      incogaps,      {.i = +1 } },
-	{ MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_SHIFT,   XKB_KEY_L,      incogaps,      {.i = -1 } },
-	{ MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_CTRL,    XKB_KEY_h,      incigaps,      {.i = +1 } },
-	{ MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_CTRL,    XKB_KEY_l,      incigaps,      {.i = -1 } },
-	{ MODKEY|WLR_MODIFIER_LOGO,  XKB_KEY_0,          togglegaps,     {0} },
-	{ MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_SHIFT,   XKB_KEY_parenright,defaultgaps,    {0} },
-	{ MODKEY,                    XKB_KEY_y,          incohgaps,     {.i = +1 } },
-	{ MODKEY,                    XKB_KEY_o,          incohgaps,     {.i = -1 } },
-	{ MODKEY|WLR_MODIFIER_CTRL,  XKB_KEY_y,          incovgaps,     {.i = +1 } },
-	{ MODKEY|WLR_MODIFIER_CTRL,  XKB_KEY_o,          incovgaps,     {.i = -1 } },
-	{ MODKEY|WLR_MODIFIER_LOGO,  XKB_KEY_y,          incihgaps,     {.i = +1 } },
-	{ MODKEY|WLR_MODIFIER_LOGO,  XKB_KEY_o,          incihgaps,     {.i = -1 } },
-	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_Y,          incivgaps,     {.i = +1 } },
-	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_O,          incivgaps,     {.i = -1 } },
+	{ MODKEY,                    XKB_KEY_g,          incgaps,       {.i = +1 } },
+	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_G,          incgaps,       {.i = -1 } },
+	//{ MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_SHIFT,   XKB_KEY_H,      incogaps,      {.i = +1 } },
+	//{ MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_SHIFT,   XKB_KEY_L,      incogaps,      {.i = -1 } },
+	//{ MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_CTRL,    XKB_KEY_h,      incigaps,      {.i = +1 } },
+	//{ MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_CTRL,    XKB_KEY_l,      incigaps,      {.i = -1 } },
+	//{ MODKEY|WLR_MODIFIER_LOGO,  XKB_KEY_0,          togglegaps,     {0} },
+	//{ MODKEY|WLR_MODIFIER_LOGO|WLR_MODIFIER_SHIFT,   XKB_KEY_parenright,defaultgaps,    {0} },
+	//{ MODKEY,                    XKB_KEY_y,          incohgaps,     {.i = +1 } },
+	//{ MODKEY,                    XKB_KEY_o,          incohgaps,     {.i = -1 } },
+	//{ MODKEY|WLR_MODIFIER_CTRL,  XKB_KEY_y,          incovgaps,     {.i = +1 } },
+	//{ MODKEY|WLR_MODIFIER_CTRL,  XKB_KEY_o,          incovgaps,     {.i = -1 } },
+	//{ MODKEY|WLR_MODIFIER_LOGO,  XKB_KEY_y,          incihgaps,     {.i = +1 } },
+	//{ MODKEY|WLR_MODIFIER_LOGO,  XKB_KEY_o,          incihgaps,     {.i = -1 } },
+	//{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_Y,          incivgaps,     {.i = +1 } },
+	//{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_O,          incivgaps,     {.i = -1 } },
+
+  /* move focused window to tag */
+ { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_1, tag, {.ui = 1 << 0} },
+ { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_2, tag, {.ui = 1 << 1} },
+ { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_3, tag, {.ui = 1 << 2} },
+ { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_4, tag, {.ui = 1 << 3} },
+ { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_5, tag, {.ui = 1 << 4} },
+ { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_6, tag, {.ui = 1 << 5} },
+ { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_7, tag, {.ui = 1 << 6} },
+ { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_8, tag, {.ui = 1 << 7} },
+ { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_9, tag, {.ui = 1 << 8} },
 
 	TAGKEYS(          XKB_KEY_1, XKB_KEY_exclam,                     0),
 	TAGKEYS(          XKB_KEY_2, XKB_KEY_at,                         1),
@@ -233,7 +245,7 @@ static const Key keys[] = {
 	TAGKEYS(          XKB_KEY_8, XKB_KEY_asterisk,                   7),
 	TAGKEYS(          XKB_KEY_9, XKB_KEY_parenleft,                  8),
 
-	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_Q,          quit,           {0} },
+	{ MODKEY|WLR_MODIFIER_SHIFT|WLR_MODIFIER_CTRL, XKB_KEY_Q,          quit,           {0} },
 
 	/* Ctrl-Alt-Backspace and Ctrl-Alt-Fx used to be handled by X server */
 	{ WLR_MODIFIER_CTRL|WLR_MODIFIER_ALT,XKB_KEY_Terminate_Server, quit, {0} },
