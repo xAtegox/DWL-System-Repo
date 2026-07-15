@@ -62,6 +62,13 @@ static const Rule rules[] = {
 	{ "EXAMPLE",   NULL,      0,        1,          -1 }, 
 };
 
+/* Autostart */
+static const char *const autostart[] = {
+   "sh", "-c", "sleep 0.2 && wal -R", NULL,
+   NULL /* terminate */
+};
+
+
 /* layout(s) */
 static const Layout layouts[] = {
 	/* symbol     arrange function */
