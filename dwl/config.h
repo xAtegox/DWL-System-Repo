@@ -7,7 +7,8 @@
 /* toggle title */ 
 /* reload bar colour */ 
 /* hide vacant tags */ 
-/* bar colour */
+/* bar colour */ 
+/* autostart apps */
 
 /* Taken from https://github.com/djpohly/dwl/issues/466 */
 #define COLOR(hex)    { ((hex >> 24) & 0xFF) / 255.0f, \
