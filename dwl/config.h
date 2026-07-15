@@ -6,7 +6,8 @@
 /* bar patch */ 
 /* toggle title */ 
 /* reload bar colour */ 
-/* hide vacant tags */
+/* hide vacant tags */ 
+/* bar colour */
 
 /* Taken from https://github.com/djpohly/dwl/issues/466 */
 #define COLOR(hex)    { ((hex >> 24) & 0xFF) / 255.0f, \
@@ -23,13 +24,13 @@ static const unsigned int gappih           = 20; /* horiz inner gap between wind
 static const unsigned int gappiv           = 20; /* vert inner gap between windows */
 static const unsigned int gappoh           = 20; /* horiz outer gap between windows and screen edge */
 static const unsigned int gappov           = 30; /* vert outer gap between windows and screen edge */ 
-static const int window_title              = 0;  /* 1 means showing window titles on the bar */
+static const int window_title              = 1;  /* 1 means showing window titles on the bar */
 static const int showbar                   = 1; /* 0 means no bar */
 static const int topbar                    = 1; /* 0 means bottom bar */ 
 static const int refresh_colors            = 1; /* 1 means reloading colors when the session starts*/
-static const char *colors_file             = "/home/atego/.cache/wal/dwl-colors"; /* change the username */
+static const char *colors_file             = "/home/atego/.Xresources"; /* change the username */
 
-static const char *fonts[]                 = {"monospace:size=10"};
+static const char *fonts[]                 = {"monospace:size=11"};
 static const float rootcolor[]             = COLOR(0x000000ff);
 
 /* This conforms to the xdg-protocol. Set the alpha to zero to restore the old behavior */
@@ -57,9 +58,9 @@ static const Rule rules[] = {
 /* layout(s) */
 static const Layout layouts[] = {
 	/* symbol     arrange function */
-	{ "",      tile },
+	{ "",     tile },
 	{ "",      NULL },    /* no layout function means floating behavior */
-	{ "",      monocle },
+	{ "",     monocle },
 };
 
 /* monitors */
@@ -158,7 +159,7 @@ static const Key keys[] = {
  { MODKEY, XKB_KEY_Return, spawn, {.v = term} },        // Kitty
  { MODKEY, XKB_KEY_b,      spawn, {.v = browser} },     // Browser
  { MODKEY, XKB_KEY_d,      spawn, {.v = (const char*[]){ "vesktop", NULL } } }, // Discord
- { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_b, togglebar, {0}}, // Toggle bar
+ { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_B, togglebar, {0}}, // Toggle bar
  { MODKEY|WLR_MODIFIER_CTRL, XKB_KEY_x, reload_colors,  {0} }, // Reload colours
 
 	/* other programs */
