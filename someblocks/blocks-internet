@@ -1,0 +1,3 @@
+modem=$(mmcli -L | grep -P "/org/freedesktop/.+\d" -m 1 -o)
+
+nmcli -t -f active,ssid dev wifi | grep -E 'yes' | cut -c 5- | grep . || (mmcli -m $modem  | grep "operator name:" | cut -c 38- | tr -d '\n' && mmcli -m $modem  | grep -P " \d+%" -o) || echo "Disconnected"

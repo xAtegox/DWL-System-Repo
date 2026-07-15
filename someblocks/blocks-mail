@@ -1,0 +1,2 @@
+unread="$(find "${XDG_DATA_HOME:-$HOME/.local/share}"/mail/*/INBOX/new/ -type f | wc -l 2>/dev/null)"
+echo $unread

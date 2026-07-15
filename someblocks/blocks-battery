@@ -1,0 +1,10 @@
+#!/bin/bash
+percentage=$(upower -i /org/freedesktop/UPower/devices/battery_BAT1 | grep percentage: | cut -c 26-)
+state=$(upower -i /org/freedesktop/UPower/devices/battery_BAT1 | grep state: | cut -c 26- | grep -E '^discharging$')
+
+if [ -z $state ]
+then
+	echo $percentage+
+else
+	echo $percentage
+fi
