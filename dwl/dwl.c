@@ -88,7 +88,7 @@
 #define PREFIX(str, prefix)     !strncmp(str, prefix, strlen(prefix))
 
 /* enums */
-enum { SchemeNorm, SchemeSel, SchemeUrg }; /* color schemes */
+enum { SchemeNorm, SchemeSel, SchemeUrg, SchemeStatus, SchemeTagsSel, SchemeTagsNorm, SchemeInfoSel, SchemeInfoNorm }; /* color schemes */
 enum { CurNormal, CurPressed, CurMove, CurResize }; /* cursor */
 enum { XDGShell, LayerShell, X11 }; /* client types */
 enum { LyrBg, LyrBottom, LyrTile, LyrFloat, LyrTop, LyrFS, LyrOverlay, LyrBlock, NUM_LAYERS }; /* scene layers */
@@ -1654,12 +1654,12 @@ drawbar(Monitor *m)
     if(!(occ & 1 << i || m->tagset[m->seltags] & 1 << i))
       continue;
 		w = TEXTW(m, tags[i]);
-		drwl_setscheme(m->drw, colors[m->tagset[m->seltags] & 1 << i ? SchemeSel : SchemeNorm]);
+		drwl_setscheme(m->drw, colors[m->tagset[m->seltags] & 1 << i ? SchemeTagsSel : SchemeTagsNorm]);
 		drwl_text(m->drw, x, 0, w, m->b.height, m->lrpad / 2, tags[i], urg & 1 << i);
 		x += w;
 	}
 	w = TEXTW(m, m->ltsymbol);
-	drwl_setscheme(m->drw, colors[SchemeNorm]);
+	drwl_setscheme(m->drw, colors[m == selmon ? SchemeInfoSel : SchemeInfoNorm]);
 	x = drwl_text(m->drw, x, 0, w, m->b.height, m->lrpad / 2, m->ltsymbol, 0);
 
 	if ((w = m->b.width - tw - x) > m->b.height) {
@@ -1721,8 +1721,8 @@ drawstatus(Monitor *m)
 
 	x = m->b.width - tw;
 	itext = stext;
-	scheme[0] = colors[SchemeNorm][0];
-	scheme[1] = colors[SchemeNorm][1];
+	scheme[0] = colors[SchemeStatus][0];
+  scheme[1] = colors[SchemeStatus][1];
 	drwl_setscheme(m->drw, scheme);
 	for (p = stext; *p; p++) {
 		if (PREFIX(p, "^^")) {
@@ -1757,9 +1757,9 @@ drawstatus(Monitor *m)
 
 			/* reset color back to normal if none was provided */
 			if (!scheme[0])
-				scheme[0] = colors[SchemeNorm][0];
-			if (!scheme[1])
-				scheme[1] = colors[SchemeNorm][1];
+         scheme[0] = colors[SchemeStatus][0];
+      if (!scheme[1])
+         scheme[1] = colors[SchemeStatus][1];
 
 			itext = argend + 1;
 			drwl_setscheme(m->drw, scheme);
