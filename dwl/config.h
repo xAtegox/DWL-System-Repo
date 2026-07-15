@@ -176,6 +176,7 @@ static const Key keys[] = {
  { MODKEY, XKB_KEY_d,      spawn, {.v = (const char*[]){ "vesktop", NULL } } }, // Discord
  { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_B, togglebar, {0}}, // Toggle bar
  { MODKEY|WLR_MODIFIER_CTRL, XKB_KEY_x, reload_colors,  {0} }, // Reload colours
+ { MODKEY,XKB_KEY_p, spawn, {.v = (const char*[]){"wmenu-run", NULL}}}, // WMENU (dmenu)
 
 	/* other programs */
 	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_D, spawn, {.v = (const char*[]){ "darktable", NULL } } },
