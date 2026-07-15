@@ -1,8 +1,6 @@
 /* patches: */
 /* rotate clients */
 /* vanity-gaps 0.7 */
-/* client opacity focus */
-/* custom float */ 
 /* minimise fix */ 
 /* cursor hide */
 
@@ -27,9 +25,6 @@ static const float focuscolor[]            = COLOR(0x005577ff);
 static const float urgentcolor[]           = COLOR(0xff0000ff);
 /* This conforms to the xdg-protocol. Set the alpha to zero to restore the old behavior */
 static const float fullscreen_bg[]         = {0.0f, 0.0f, 0.0f, 1.0f}; /* You can also use glsl colors */
-static const int respect_monitor_reserved_area = 0;  /* 1 to monitor center while respecting the monitor's reserved area, 0 to monitor center */
-static const float default_opacity_unfocus = 1.0f;
-static const float default_opacity_focus   = 1.0f;
 
 /* tagging - TAGCOUNT must be no greater than 31 */
 #define TAGCOUNT (9)
@@ -39,12 +34,9 @@ static int log_level = WLR_ERROR;
 
 /* NOTE: ALWAYS keep a rule declared even if you don't use rules (e.g leave at least one example) */
 static const Rule rules[] = {
-	/* app_id  title  tags mask  isfloating  alpha unfocus  monitor x y w h*/
+	/* app_id     title   tags mask  isfloating   monitor*/
 	/* examples: */
-	{ "EXAMPLE",  NULL,       0,       1,      default_opacity_unfocus, -1 }, 
-	{ "foot",     NULL,       0,       0,      0.75,    -1 },
-	{ "foot",    "fzf",       0, 	   1,      1,       -1, 310, 200, 1300, 0.4},
-	{ "foot",    "menu",      0, 	   1,      1,       -1, 710, 300, 500, 0.35},
+	{ "EXAMPLE",   NULL,      0,        1,          -1 }, 
 };
 
 /* layout(s) */
@@ -190,7 +182,6 @@ static const Key keys[] = {
 	{ MODKEY,                    XKB_KEY_0,          view,           {.ui = ~0} },
 	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_parenright, tag,            {.ui = ~0} },
 
-
 	/* monitors */
 	// { MODKEY,                    XKB_KEY_comma,      focusmon,       {.i = WLR_DIRECTION_LEFT} },
 	//{ MODKEY,                    XKB_KEY_backslash,      focusmon,       {.i = WLR_DIRECTION_LEFT} },
@@ -198,14 +189,6 @@ static const Key keys[] = {
 	//{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_bar,       tagmon,         {.i = WLR_DIRECTION_LEFT} },
 	// { MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_greater,    tagmon,         {.i = WLR_DIRECTION_RIGHT} },
 	
-
-	/* client opacity focus */
-	//{ MODKEY|WLR_MODIFIER_CTRL,  XKB_KEY_k,          setopacityunfocus, {.f = +0.1f} },
-	//{ MODKEY|WLR_MODIFIER_CTRL,  XKB_KEY_j,          setopacityunfocus, {.f = -0.1f} },
-	//{ MODKEY|WLR_MODIFIER_CTRL|WLR_MODIFIER_SHIFT, XKB_KEY_K, setopacityfocus, {.f = +0.1f} },
-	//{ MODKEY|WLR_MODIFIER_CTRL|WLR_MODIFIER_SHIFT, XKB_KEY_J, setopacityfocus, {.f = -0.1f} },
-
-
 	/* vanity gaps */
 	{ MODKEY,                    XKB_KEY_g,          incgaps,       {.i = +1 } },
 	{ MODKEY|WLR_MODIFIER_SHIFT, XKB_KEY_G,          incgaps,       {.i = -1 } },

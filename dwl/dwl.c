@@ -235,12 +235,7 @@ typedef struct {
 	const char *title;
 	uint32_t tags;
 	int isfloating;
-	float opacity_unfocus;
 	int monitor;
-	int x;
-	int y;
-	float w;
-	float h;
 } Rule;
 
 typedef struct {
@@ -342,7 +337,6 @@ static void requeststartdrag(struct wl_listener *listener, void *data);
 static void requestmonstate(struct wl_listener *listener, void *data);
 static void resize(Client *c, struct wlr_box geo, int interact);
 static void run(char *startup_cmd);
-static void scenebuffersetopacity(struct wlr_scene_buffer *buffer, int sx, int sy, void *user_data);
 static void setcursor(struct wl_listener *listener, void *data);
 static void setcursorshape(struct wl_listener *listener, void *data);
 static void setfloating(Client *c, int floating);
@@ -351,8 +345,6 @@ static void setgaps(int oh, int ov, int ih, int iv);
 static void setlayout(const Arg *arg);
 static void setmfact(const Arg *arg);
 static void setmon(Client *c, Monitor *m, uint32_t newtags);
-static void setopacityunfocus(const Arg *arg);
-static void setopacityfocus(const Arg *arg);
 static void setpsel(struct wl_listener *listener, void *data);
 static void setsel(struct wl_listener *listener, void *data);
 static void setup(void);
@@ -522,11 +514,6 @@ applyrules(Client *c)
 	int i;
 	const Rule *r;
 	Monitor *mon = selmon, *m;
-	int newwidth;
-	int newheight;
-	int newx;
-	int newy;
-	int apply_resize = 0;
 
 	appid = client_get_appid(c);
 	title = client_get_title(c);
@@ -535,35 +522,17 @@ applyrules(Client *c)
 		if ((!r->title || strstr(title, r->title))
 				&& (!r->id || strstr(appid, r->id))) {
 			c->isfloating = r->isfloating;
-			c->opacity = r->opacity_unfocus;
 			newtags |= r->tags;
 			i = 0;
 			wl_list_for_each(m, &mons, link) {
 				if (r->monitor == i++)
 					mon = m;
-				if (c->isfloating || !mon->lt[mon->sellt]->arrange) {
-					/* client is floating or in floating layout */
-					struct wlr_box b = respect_monitor_reserved_area ? mon->w : mon->m;
-					newwidth  = (int)round((r->w >= 0) ? (r->w <= 1 ? b.width  * r->w       : r->w)       : c->geom.width);
-					newheight = (int)round((r->h >= 0) ? (r->h <= 1 ? b.height * r->h       : r->h)       : c->geom.height);
-					newx      = (int)round((r->x >= 0) ? (r->x <= 1 ? b.width  * r->x + b.x : r->x + b.x) : c->geom.x);
-					newy      = (int)round((r->y >= 0) ? (r->y <= 1 ? b.height * r->y + b.y : r->y + b.y) : c->geom.y);
-					apply_resize = 1;
-				}
 			}
 		}
 	}
 
 	c->isfloating |= client_is_float_type(c);
 	setmon(c, mon, newtags);
-	if (apply_resize) {
-		resize(c, (struct wlr_box){
-				.x = newx,
-				.y = newy,
-				.width = newwidth,
-				.height = newheight,
-		}, 1);
-	}
 }
 
 void
@@ -1197,10 +1166,6 @@ createnotify(struct wl_listener *listener, void *data)
 	c = toplevel->base->data = ecalloc(1, sizeof(*c));
 	c->surface.xdg = toplevel->base;
 	c->bw = borderpx;
-	/* Set default opacity*/
-	c->opacity_unfocus = default_opacity_unfocus;
-	c->opacity_focus = default_opacity_focus;
-	c->opacity = default_opacity_unfocus;
 
 	LISTEN(&toplevel->base->surface->events.commit, &c->commit, commitnotify);
 	LISTEN(&toplevel->base->surface->events.map, &c->map, mapnotify);
@@ -1509,8 +1474,6 @@ focusclient(Client *c, int lift)
 		wl_list_insert(&fstack, &c->flink);
 		selmon = c->mon;
 		c->isurgent = 0;
-		c->opacity = c->opacity_focus;
-
 		/* Don't change border color if there is an exclusive focus or we are
 		 * handling a drag operation */
 		if (!exclusive_focus && !seat->drag)
@@ -1534,7 +1497,6 @@ focusclient(Client *c, int lift)
 			client_set_border_color(old_c, bordercolor);
 
 			client_activate_surface(old, 0);
-			old_c->opacity = old_c->opacity_unfocus;
 		}
 	}
 	printstatus();
@@ -2350,7 +2312,6 @@ rendermon(struct wl_listener *listener, void *data)
 	/* Render if no XDG clients have an outstanding resize and are visible on
 	 * this monitor. */
 	wl_list_for_each(c, &clients, link) {
-		wlr_scene_node_for_each_buffer(&c->scene_surface->node, scenebuffersetopacity, c);
 		if (c->resize && !c->isfloating && client_is_rendered_on_mon(c, m) && !client_is_stopped(c))
 			goto skip;
 	}
@@ -2489,15 +2450,6 @@ run(char *startup_cmd)
 }
 
 void
-scenebuffersetopacity(struct wlr_scene_buffer *buffer, int sx, int sy, void *data)
-{
-	Client *c = data;
-	/* xdg-popups are children of Client.scene, we do not have to worry about
-	 * messing with them. */
-	wlr_scene_buffer_set_opacity(buffer, c->isfullscreen ? 1 : c->opacity);
-}
-
-void
 setcursor(struct wl_listener *listener, void *data)
 {
 	/* This event is raised by the seat when a client provides a cursor image */
@@ -2577,7 +2529,6 @@ setfullscreen(Client *c, int fullscreen)
 		 * client positions are set by the user and cannot be recalculated */
 		resize(c, c->prev, 0);
 	}
-	wlr_scene_node_for_each_buffer(&c->scene_surface->node, scenebuffersetopacity, c);
 	arrange(c->mon);
 	printstatus();
 }
@@ -2642,38 +2593,6 @@ setmon(Client *c, Monitor *m, uint32_t newtags)
 		setfloating(c, c->isfloating);
 	}
 	focusclient(focustop(selmon), 1);
-}
-
-
-void
-setopacityunfocus(const Arg *arg)
-{
-	Client *sel = focustop(selmon);
-	if (!sel)
-		return;
-
-	sel->opacity_unfocus += arg->f;
-	if (sel->opacity_unfocus > 1.0)
-		sel->opacity_unfocus = 1.0f;
-
-	wlr_scene_node_for_each_buffer(&sel->scene_surface->node, scenebuffersetopacity, sel);
-}
-
-void
-setopacityfocus(const Arg *arg)
-{
-	Client *sel = focustop(selmon);
-	if (!sel)
-		return;
-
-	sel->opacity_focus += arg->f;
-	if (sel->opacity_focus > 1.0)
-		sel->opacity_focus = 1.0f;
-
-	/* Change opacity from current client */
-	sel->opacity = sel->opacity_focus;
-
-	wlr_scene_node_for_each_buffer(&sel->scene_surface->node, scenebuffersetopacity, sel);
 }
 
 void
